@@ -1,0 +1,1259 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>古风飞花令</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B4513',      // 棕色主色调，体现古风
+                        secondary: '#D2B48C',    // 棕黄色辅助色
+                        accent: '#CD5C5C',       // 朱红色强调色
+                        paper: '#F5F0E1',        // 宣纸色背景
+                        ink: '#2C1E1E',          // 墨色文字
+                        ai: '#4A6FA5',           // AI对话气泡颜色
+                        user: '#9C7C4A',         // 用户对话气泡颜色
+                    },
+                    fontFamily: {
+                        ancient: ['"Ma Shan Zheng"', '"Noto Serif SC"', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            body {
+                touch-action: manipulation;
+                overflow-x: hidden;
+                overflow-y: auto !important; /* 强制垂直滚动 */
+                height: auto !important;
+            }
+            .app {
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+            .page {
+                position: relative !important; /* 覆盖absolute */
+                min-height: 100vh;
+                padding-bottom: 20px;
+            }
+            /* 确保游戏页面内容足够高 */
+            .game-page {
+                min-height: 100vh;
+            }
+            .bg-pattern {
+                background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d2b48c' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+            .scroll-poem {
+                background-image: linear-gradient(transparent 0%, #F5F0E1 10%, #F5F0E1 90%, transparent 100%);
+            }
+            .ink-splash {
+                animation: inkSplash 0.8s ease-out forwards;
+            }
+            .brush-stroke {
+                animation: brushStroke 1.2s ease-out forwards;
+                stroke-dasharray: 1000;
+                stroke-dashoffset: 1000;
+            }
+            .fade-in {
+                animation: fadeIn 0.6s ease-out forwards;
+            }
+            .slide-up {
+                animation: slideUp 0.5s ease-out forwards;
+            }
+            .float {
+                animation: float 3s ease-in-out infinite;
+            }
+            .pulse {
+                animation: pulse 1.5s ease-in-out infinite;
+            }
+            .page-transition {
+                animation: pageTransition 0.5s ease-in-out forwards;
+            }
+            .button-hover {
+                transition: all 0.3s ease;
+            }
+            .button-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            .ai-card {
+                backdrop-filter: blur(8px);
+                transition: all 0.5s ease;
+            }
+            .ai-card:hover {
+                transform: translateY(-5px) scale(1.02);
+            }
+        }
+    </style>
+    
+    <!-- 引入字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&amp;family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        /* 基础动画定义 */
+        @keyframes inkSplash {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes brushStroke {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pageTransition {
+            0% { opacity: 0; transform: translateX(20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* 倒计时动画 */
+        @keyframes countdown {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 314; }
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(210, 180, 140, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 69, 19, 0.3);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 69, 19, 0.5);
+        }
+        
+        /* 全局样式 */
+        body {
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+        
+        /* 诗句滚动容器 */
+        .poem-scroll-container {
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+        
+        /* 页面容器 */
+        .page {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block;
+            animation: pageTransition 0.5s ease-out forwards;
+        }
+        
+        /* 背景切换样式 */
+        .background-container {
+            transition: background-image 1s ease-in-out;
+        }
+        
+        /* 倒计时圆环 - 只为圆环路径应用旋转，不影响整个SVG */
+        .countdown-ring {
+            animation: countdown 1s linear forwards;
+            /* 移除整个SVG的旋转 - 保持空规则集用于未来扩展 */
+        }
+        
+        .countdown-ring-circle {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke-dasharray: 314; /* 2 * π * 50 */
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        /* 确保按钮可点击 */
+        button {
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-paper bg-pattern text-ink min-h-screen font-ancient overflow-x-hidden">
+    <div id="app" class="relative w-full min-h-screen overflow-hidden">
+        <!-- 首页 -->
+        <div class="page active" id="home-page">
+            <!-- 背景容器 -->
+            <div class="background-container absolute inset-0 bg-cover bg-center transition-all duration-1000" :style="{ backgroundImage: 'url(' + currentBackground + ')' }">
+                <!-- 半透明遮罩 -->
+                <div class="absolute inset-0 bg-ink/30"></div>
+            </div>
+            
+            <!-- 右上角功能按钮 -->
+            <div class="absolute top-6 right-6 z-50 flex flex-col gap-3">
+                <button @click="showInfo('intro')" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white button-hover shadow-md focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fa fa-info text-lg"></i>
+                </button>
+                <button @click="showInfo('ai-character')" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white button-hover shadow-md focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fa fa-user text-lg"></i>
+                </button>
+                <button @click="showInfo('rules')" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white button-hover shadow-md focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fa fa-book text-lg"></i>
+                </button>
+                
+                <!-- 音乐控制 -->
+                <div class="relative" @mouseenter="showMusicList = true" @mouseleave="handleMusicListLeave">
+                    <button @click="toggleMusic" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white button-hover shadow-md focus:outline-none focus:ring-2 focus:ring-white/50">
+                        <i :class="isMusicPlaying ? 'fa fa-volume-up' : 'fa fa-volume-mute'"></i>
+                    </button>
+                    
+                    <!-- 音乐列表 -->
+                    <div v-if="showMusicList" @mouseenter="showMusicList = true" @mouseleave="showMusicList = false" class="absolute top-12 right-0 bg-white/90 backdrop-blur-md rounded-lg p-3 min-w-48 shadow-lg z-50">
+                        <div class="text-sm text-gray-700 mb-2 font-bold">音乐列表</div>
+                        <div v-for="music in musicList" :key="music.name" @click="selectMusic(music)" class="text-xs py-1 cursor-pointer hover:bg-gray-100 rounded px-2 transition-all" :class="selectedMusic && selectedMusic.name === music.name ? 'bg-primary/20 text-primary font-bold' : 'text-gray-600'">
+                            {{ music.name }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 主标题 -->
+            <div class="relative z-10 pt-16 px-6 text-center">
+                <h1 class="text-[clamp(2.5rem,8vw,4rem)] text-white font-bold tracking-wider ink-splash drop-shadow-lg">
+                    古风飞花令
+                </h1>
+                <p class="text-[clamp(1rem,3vw,1.25rem)] text-white/90 mt-2 slide-up" style="animation-delay: 0.3s">
+                    以诗会友，以词传情
+                </p>
+            </div>
+            
+            <!-- AI角色展示区 -->
+            <div class="relative z-10 flex justify-center my-8 px-6">
+                <div class="ai-card bg-white/20 rounded-xl p-4 max-w-xs w-full border border-white/30 shadow-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-white/50 float">
+                            <img src="profile.jpg" alt="AI角色吟风形象" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-white slide-up" style="animation-delay: 0.4s">吟风</h3>
+                            <p class="text-white/80 text-sm slide-up" style="animation-delay: 0.6s">
+                                在下吟风，愿与阁下<br>共赏诗词之美
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-white/90 text-sm italic slide-up" style="animation-delay: 0.8s">
+                        "腹有诗书气自华，诗词之道，在于心领神会。"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 开始按钮 -->
+            <div class="relative z-10 flex justify-center mt-[15vh]">
+                <button @click="goToPage('difficulty-page')" class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-ancient text-xl py-4 px-10 rounded-full border-2 border-white/40 transition-all pulse shadow-lg button-hover focus:outline-none focus:ring-2 focus:ring-white/50">
+                    开始游戏
+                </button>
+            </div>
+            
+            <!-- 背景选择器 -->
+            <div class="absolute bottom-8 left-0 right-0 z-10 flex justify-center gap-3">
+                <div v-for="(bg, index) in backgrounds" :key="index" @click="currentBackground = bg" class="w-8 h-8 rounded-full border-2 cursor-pointer transition-all button-hover" :class="currentBackground === bg ? 'border-white scale-125' : 'border-white/50'">
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- 难度选择页 -->
+        <div class="page" id="difficulty-page">
+            <!-- 顶部返回按钮 -->
+            <div class="absolute top-6 left-6 z-10">
+                <button @click="goToPage('home-page')" class="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center text-primary hover:bg-primary/30 transition-all shadow-md button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- 音乐控制 - 右上角 -->
+            <div class="absolute top-6 right-6 z-10">
+                <button @click="toggleMusic" class="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center text-primary hover:bg-primary/30 transition-all shadow-md button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i :class="isMusicPlaying ? 'fa fa-volume-up' : 'fa fa-volume-mute'"></i>
+                </button>
+            </div>
+            
+            <!-- 页面标题 -->
+            <div class="pt-16 px-6 text-center mb-12">
+                <h2 class="text-[clamp(2rem,6vw,3rem)] text-primary font-bold tracking-wider ink-splash">选择难度</h2>
+                <p class="text-[clamp(0.9rem,2.5vw,1.1rem)] text-primary/80 mt-2">
+                    请选择适合您的挑战难度
+                </p>
+            </div>
+            
+            <!-- 难度选项 -->
+            <div class="px-6 space-y-6">
+                <!-- 入门级 -->
+                <div @click="selectDifficulty('easy')" class="bg-white/70 backdrop-blur-sm rounded-xl p-6 border-2 border-secondary/30 hover:border-primary/50 transition-all cursor-pointer shadow-md transform hover:-translate-y-1 button-hover">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-primary">入门级</h3>
+                            <p class="text-sm text-primary/70 mt-1">适合诗词初学者</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                            <i class="fa fa-leaf text-primary text-xl"></i>
+                        </div>
+                    </div>
+                    <ul class="mt-4 text-sm space-y-2 text-ink/80">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>关键字为常见字（如"月""花""春"）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>AI每轮提示诗句作者</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>60秒思考时间，可跳过1次</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 进阶级 -->
+                <div @click="selectDifficulty('medium')" class="bg-white/70 backdrop-blur-sm rounded-xl p-6 border-2 border-secondary/30 hover:border-primary/50 transition-all cursor-pointer shadow-md transform hover:-translate-y-1 button-hover">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-primary">进阶级</h3>
+                            <p class="text-sm text-primary/70 mt-1">适合有一定基础者</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                            <i class="fa fa-star text-primary text-xl"></i>
+                        </div>
+                    </div>
+                    <ul class="mt-4 text-sm space-y-2 text-ink/80">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>关键字为次常见字（如"酒""客""寒"）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>AI仅在请求时提供作者信息</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>40秒思考时间，不可跳过</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 高手级 -->
+                <div @click="selectDifficulty('hard')" class="bg-white/70 backdrop-blur-sm rounded-xl p-6 border-2 border-secondary/30 hover:border-primary/50 transition-all cursor-pointer shadow-md transform hover:-translate-y-1 button-hover">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-primary">高手级</h3>
+                            <p class="text-sm text-primary/70 mt-1">适合诗词达人</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                            <i class="fa fa-trophy text-primary text-xl"></i>
+                        </div>
+                    </div>
+                    <ul class="mt-4 text-sm space-y-2 text-ink/80">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>关键字为较生僻字（如"簪""砚""棹"）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>不提供任何提示</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>20秒思考时间，需准确说出上下句</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏页面 -->
+        <div class="page overflow-y-auto" id="game-page">
+            <!-- 顶部返回按钮和暂停按钮 -->
+            <div class="absolute top-6 left-6 z-10">
+                <button @click="goToPage('difficulty-page')" class="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center text-primary hover:bg-primary/30 transition-all shadow-md button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="absolute top-6 right-6 z-10 flex gap-2">
+                <!-- 暂停按钮 -->
+                <button @click="togglePause" class="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center text-primary hover:bg-primary/30 transition-all shadow-md button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i v-if="!isPaused" class="fa fa-pause text-lg"></i>
+                    <i v-if="isPaused" class="fa fa-play text-lg"></i>
+                </button>
+                
+                <!-- 音乐控制 -->
+                <button @click="toggleMusic" class="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center text-primary hover:bg-primary/30 transition-all shadow-md button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i :class="isMusicPlaying ? 'fa fa-volume-up' : 'fa fa-volume-mute'"></i>
+                </button>
+            </div>
+            
+            <!-- 关键字显示 -->
+            <div class="pt-12 px-6 mb-3">
+                <div class="bg-primary/10 rounded-xl p-3 text-center border border-primary/20">
+                    <h3 class="text-xs text-primary/80">当前关键字</h3>
+                    <div class="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-accent tracking-widest ink-splash mt-1">
+                        {{ keyword }}
+                    </div>
+                    
+                    <!-- 轮数进度 -->
+                    <div class="mt-3">
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="text-primary/80 text-xs">进度：</span>
+                            <span class="text-primary font-bold text-sm">{{ currentRound }}/{{ roundLimits[difficulty] }}</span>
+                        </div>
+                        <div class="w-full bg-secondary/20 rounded-full h-1.5">
+                            <div class="bg-primary rounded-full h-1.5 transition-all duration-300" :style="{ width: (currentRound / roundLimits[difficulty] * 100) + '%' }"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 游戏区域 -->
+            <div class="px-4 flex gap-2 mb-3">
+                <!-- AI形象 -->
+                <div class="w-16 flex-shrink-0">
+                    <div class="bg-white/60 backdrop-blur-sm rounded-lg p-2 border border-secondary/30 shadow-md">
+                        <img src="profile.jpg" alt="AI角色吟风形象" class="w-full h-auto rounded">
+                        <p class="text-center text-xs text-primary mt-1">吟风</p>
+                    </div>
+                </div>
+                
+                <!-- 对话区域 -->
+                <div class="flex-1">
+                    <!-- 诗句列表 -->
+                    <div class="bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-secondary/30 shadow-md h-[40vh] overflow-y-auto mb-2">
+                        <div v-for="(poem, index) in poemList" :key="index" class="mb-2 last:mb-0">
+                            <!-- AI的诗句 -->
+                            <div v-if="poem.sender === 'ai'" class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-ai/20 flex items-center justify-center text-ai text-xs mr-2 mt-1 flex-shrink-0">
+                                    <i class="fa fa-robot"></i>
+                                </div>
+                                <div class="bg-ai/10 rounded-lg rounded-tl-none p-2 max-w-[80%] text-sm">
+                                    <p>{{ poem.content }}</p>
+                                    <p v-if="poem.author" class="text-xs text-ai/70 mt-1">—— {{ poem.author }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 用户的诗句 -->
+                            <div v-if="poem.sender === 'user'" class="flex items-start justify-end">
+                                <div class="bg-user/10 rounded-lg rounded-tr-none p-2 max-w-[80%] text-sm">
+                                    <p>{{ poem.content }}</p>
+                                </div>
+                                <div class="w-6 h-6 rounded-full bg-user/20 flex items-center justify-center text-user text-xs ml-2 mt-1 flex-shrink-0">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 倒计时和输入区 -->
+                    <div class="relative">
+                        <!-- 倒计时圆环 -->
+                        <div class="absolute right-3 top-[-30px] w-16 h-16">
+                            <svg class="countdown-ring w-full h-full" viewBox="0 0 100 100">
+                                <!-- 背景圆环 -->
+                                <circle cx="50" cy="50" r="45" fill="transparent" stroke="#F5F0E1" stroke-width="8"></circle>
+                                <!-- 进度圆环 -->
+                                <circle class="countdown-ring-circle" cx="50" cy="50" r="45" fill="transparent" stroke="currentColor" :class="timer &gt; 10 ? 'text-primary' : 'text-accent'" stroke-width="8" :stroke-dashoffset="314 - (314 * timer / initialTimer)"></circle>
+                                <!-- 倒计时数字 -->
+                                <text x="50" y="55" text-anchor="middle" font-size="25" font-weight="bold" fill="#8B4513">{{ timer }}</text>
+                            </svg>
+                        </div>
+                        
+                        <!-- 输入框 -->
+                        <textarea v-model="userInput" placeholder="请输入包含关键字的诗句..." class="w-full h-16 p-2 rounded-lg border-2 border-secondary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none bg-white/80 font-ancient text-sm transition-all duration-300 pr-16" @keypress.enter.exact="submitPoem" :disabled="isPaused || !isPlaying"></textarea>
+                        
+                        <!-- 按钮区 -->
+                        <div class="flex justify-between items-center mt-2">
+                            <!-- 左侧跳过按钮 - 所有模式都显示，但根据难度禁用 -->
+                            <div class="flex-1">
+                                <button @click="skipTurn" class="bg-secondary/20 text-primary px-3 py-1.5 rounded-lg text-sm hover:bg-secondary/30 transition-all button-hover focus:outline-none focus:ring-2 focus:ring-secondary/50" :disabled="isPaused || skipUsed || !isPlaying || !showSkipButton" :class="skipUsed || !showSkipButton ? 'opacity-50 cursor-not-allowed' : ''">
+                                    跳过
+                                    <span v-if="difficulty === 'easy'" class="ml-1 text-xs">(1次)</span>
+                                    <span v-else class="ml-1 text-xs">(不可用)</span>
+                                </button>
+                            </div>
+                            
+                            <!-- 右侧操作按钮 -->
+                            <div class="flex gap-2">
+                                <button @click="submitPoem" class="bg-primary text-white px-4 py-1.5 rounded-lg text-sm hover:bg-primary/90 transition-all button-hover focus:outline-none focus:ring-2 focus:ring-primary/50" :disabled="aiLoading || !userInput.trim() || isPaused || !isPlaying">
+                                    {{ aiLoading ? '思考中…' : '提交' }}
+                                </button>
+                                
+                                <button @click="surrender" class="bg-accent text-white px-4 py-1.5 rounded-lg text-sm hover:bg-accent/90 transition-all button-hover focus:outline-none focus:ring-2 focus:ring-accent/50" :disabled="isPaused || !isPlaying">
+                                    认输
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 信息弹窗 -->
+        <div v-if="showInfoModal" class="fixed inset-0 bg-ink/70 backdrop-blur-sm flex items-center justify-center z-50 fade-in">
+            <div class="bg-paper rounded-xl p-5 w-[90%] max-w-md max-h-[80vh] overflow-y-auto">
+                <h3 class="text-xl text-primary font-bold mb-3 flex items-center">
+                    <i v-if="currentInfo === 'intro'" class="fa fa-info-circle mr-2"></i>
+                    <i v-if="currentInfo === 'ai-character'" class="fa fa-user mr-2"></i>
+                    <i v-if="currentInfo === 'rules'" class="fa fa-book mr-2"></i>
+                    {{ infoTitles[currentInfo] }}
+                </h3>
+                
+                <div class="text-sm space-y-2 text-ink/80">
+                    <p v-if="currentInfo === 'intro'">
+                        "古风飞花令"是一款以中华传统诗词文化为核心的互动式H5网页，通过现代科技与古典文学的结合，让用户在趣味游戏中感受诗词之美，传承中华优秀传统文化。网页创新性地引入AI古风角色，以沉浸式体验让用户在飞花令游戏中积累诗词知识、提升文学素养，同时为诗词爱好者提供创作与交流的平台。
+                    </p>
+                    <p v-if="currentInfo === 'intro'">
+                        本网页打破传统飞花令的参与限制，无论何时何地，用户都能与AI展开一场诗词对决，既适合诗词初学者入门学习，也能满足资深爱好者的挑战需求，真正实现"让诗词走进生活，让传统焕发新生"。
+                    </p>
+                    
+                    <p v-if="currentInfo === 'ai-character'">
+                        AI角色设定为"吟风"，一位身着青衫、温润如玉的古风小生，其设计融合了传统文人的儒雅气质与少年的灵动活力。
+                    </p>
+                    <p v-if="currentInfo === 'ai-character'" class="font-bold mt-2">1. 形象特征：</p>
+                    <p v-if="currentInfo === 'ai-character'">面容清秀，手持折扇，常着月白或豆青色长衫，腰间系玉佩，整体造型简约雅致，符合宋代文人审美。</p>
+                    
+                    <p v-if="currentInfo === 'ai-character'" class="font-bold mt-2">2. 性格特质：</p>
+                    <p v-if="currentInfo === 'ai-character'">温文尔雅，博学多识却不张扬，对用户的诗词表现会给予恰当点评，既有鼓励也有适度点拨，输了会拱手称道，赢了也会谦逊有礼。</p>
+                    
+                    <p v-if="currentInfo === 'ai-character'" class="font-bold mt-2">3. 语言风格：</p>
+                    <p v-if="currentInfo === 'ai-character'">说话带有古风韵味却不晦涩难懂，常用"阁下""不妨""妙哉"等词语，偶尔会引用典故解释诗词背景，但会根据用户水平调整表述难度。</p>
+                    
+                    <p v-if="currentInfo === 'ai-character'" class="font-bold mt-2">4. 知识储备：</p>
+                    <p v-if="currentInfo === 'ai-character'">涵盖从先秦到近代的经典诗词，尤其擅长唐诗宋词，对诗词的作者、背景、意境有深入理解，能在游戏中自然融入讲解。</p>
+                    
+                    <p v-if="currentInfo === 'rules'" class="font-bold">基本规则：</p>
+                    <p v-if="currentInfo === 'rules'">双方轮流说出包含指定关键字的诗句，不可重复，无法接句者落败。</p>
+                    
+                    <p v-if="currentInfo === 'rules'" class="font-bold mt-2">分三个难度等级：</p>
+                    <p v-if="currentInfo === 'rules'" class="flex items-start">
+                        <span class="text-accent mr-2">•</span>
+                        <span><strong>入门级：</strong>关键字为常见字（如"月""花""春"），AI每轮提示诗句作者，允许用户60秒思考时间，可跳过1次。</span>
+                    </p>
+                    <p v-if="currentInfo === 'rules'" class="flex items-start">
+                        <span class="text-accent mr-2">•</span>
+                        <span><strong>进阶级：</strong>关键字为次常见字（如"酒""客""寒"），AI仅在用户请求时提供作者信息，思考时间缩短至40秒，不可跳过。</span>
+                    </p>
+                    <p v-if="currentInfo === 'rules'" class="flex items-start">
+                        <span class="text-accent mr-2">•</span>
+                        <span><strong>高手级：</strong>关键字为较生僻字（如"簪""砚""棹"），不提供任何提示，思考时间20秒，需准确说出上下句，否则判负。</span>
+                    </p>
+                </div>
+                
+                <button @click="showInfoModal = false" class="mt-4 w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-all button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    关闭
+                </button>
+            </div>
+        </div>
+        
+        <!-- 游戏结束弹窗 -->
+        <div v-if="showGameOverModal" class="fixed inset-0 bg-ink/70 backdrop-blur-sm flex items-center justify-center z-50 fade-in">
+            <div class="bg-paper rounded-xl p-6 w-[90%] max-w-md text-center">
+                <h3 class="text-2xl text-primary font-bold mb-4">
+                    {{ gameOverResult === 'win' ? '恭喜获胜！' : '游戏结束' }}
+                </h3>
+                
+                <div class="mb-6">
+                    <img v-if="gameOverResult === 'win'" src="profile.jpg" alt="胜利庆祝" class="w-32 h-auto mx-auto rounded-lg">
+                    <img v-if="gameOverResult === 'lose'" src="profile.jpg" alt="游戏结束" class="w-32 h-auto mx-auto rounded-lg">
+                </div>
+                
+                <p class="text-primary/90 mb-2"></p>
+                <p class="text-lg font-bold text-primary mb-6">
+                    {{ gameOverResult === 'win' ? '妙哉妙哉，小生甚是敬佩。' : '善哉善哉，小生这厢有礼了。' }}
+                </p>
+                
+                <p class="text-sm text-ink/70 mb-6">
+                    本轮共对出 {{ poemList.length }} 句含"{{ keyword }}"字的诗句
+                </p>
+                
+                <!-- 诗词背景按钮 -->
+                <div class="mb-6">
+                    <button @click="togglePoemBackground" class="bg-accent/20 text-accent px-4 py-2 rounded-lg hover:bg-accent/30 transition-all button-hover flex items-center gap-2 mx-auto">
+                        <span>≡</span>
+                        <span>诗词背景</span>
+                    </button>
+                    
+                    <!-- 诗词背景内容 -->
+                    <div v-if="showPoemBackground" class="mt-4 p-4 bg-secondary/10 rounded-lg border border-secondary/20 max-h-32 overflow-y-auto">
+                        <!-- 加载状态 -->
+                        <div v-if="backgroundLoading" class="flex items-center justify-center py-4">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
+                            <span class="ml-2 text-primary/60 text-sm">正在生成背景故事...</span>
+                        </div>
+                        <!-- 内容显示 -->
+                        <p v-else class="text-primary/80 text-sm leading-relaxed">{{ poemBackground }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button @click="restartGame" class="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-all button-hover focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        再来一局
+                    </button>
+                    <button @click="goToPage('home-page'); showGameOverModal = false" class="flex-1 bg-secondary/30 text-primary py-2 rounded-lg hover:bg-secondary/50 transition-all button-hover focus:outline-none focus:ring-2 focus:ring-secondary/50">
+                        返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                // 页面状态
+                currentPage: 'home-page',
+                // 背景图片
+                backgrounds: [
+                    '1.png',
+                    '2.png',
+                    '3.png',
+                    '4.png'
+                ],
+                currentBackground: '1.png',
+                
+                // 信息弹窗
+                showInfoModal: false,
+                currentInfo: '',
+                infoTitles: {
+                    'intro': '网页介绍',
+                    'ai-character': 'AI角色设计',
+                    'rules': '游戏规则'
+                },
+                
+                // 游戏设置
+                difficulty: 'easy', // easy, medium, hard
+                timer: 60,
+                initialTimer: 60,
+                isPlaying: false,
+                isPaused: false,
+                timerInterval: null,
+                keyword: '',
+                
+                // 轮数限制
+                roundLimits: {
+                    easy: 5,
+                    medium: 5,
+                    hard: 10
+                },
+                currentRound: 0,
+                
+                // 游戏数据
+                poemList: [],
+                userInput: '',
+                showSkipButton: true,
+                skipUsed: false,
+                
+                // 游戏结束
+                showGameOverModal: false,
+                gameOverResult: '', // win, lose
+                // AI 调用状态
+                aiLoading: false,
+                // 规范化后已使用的诗句集合（用数组存储便于序列化）
+                usedPoemNormalized: [],
+                // 诗词背景
+                showPoemBackground: false,
+                poemBackground: '',
+                backgroundLoading: false,
+                
+                // 音乐控制
+                currentMusic: null,
+                isMusicPlaying: false,
+                showMusicList: false,
+                selectedMusic: null,
+                musicList: [
+                    { name: '浮影掠光映百合-陈致逸&HOYOMIX', file: '浮影掠光映百合-陈致逸&HOYOMIX.mp3', type: 'home' },
+                    { name: '商港的闲暇-陈致逸&HOYOMIX', file: '商港的闲暇-陈致逸&HOYOMIX.mp3', type: 'easy' },
+                    { name: '盛唐令-路南', file: '盛唐令-路南.mp3', type: 'medium' },
+                    { name: '激流逐浪-陈致逸&HOYOMIX', file: '激流逐浪-陈致逸&HOYOMIX.mp3', type: 'hard' }
+                ]
+            },
+            methods: {
+                // 页面导航
+                goToPage(pageId) {
+                    // 停止当前页面的计时器
+                    if (this.currentPage === 'game-page') {
+                        this.stopTimer();
+                        this.isPlaying = false;
+                    }
+                    
+                    // 隐藏所有页面，显示目标页面
+                    document.querySelectorAll('.page').forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById(pageId).classList.add('active');
+                    this.currentPage = pageId;
+                    
+                    // 根据页面播放对应音乐
+                    if (pageId === 'home-page' || pageId === 'difficulty-page') {
+                        this.playMusic('home');
+                    } else if (pageId === 'game-page') {
+                        this.playMusic(this.difficulty);
+                    }
+                },
+                
+                // 显示信息弹窗
+                showInfo(type) {
+                    this.currentInfo = type;
+                    this.showInfoModal = true;
+                },
+                
+                // 选择难度
+                selectDifficulty(difficulty) {
+                    this.difficulty = difficulty;
+                    
+                    // 根据难度设置计时器
+                    switch(difficulty) {
+                        case 'easy':
+                            this.initialTimer = 60;
+                            this.showSkipButton = true;
+                            break;
+                        case 'medium':
+                            this.initialTimer = 40;
+                            this.showSkipButton = false;
+                            break;
+                        case 'hard':
+                            this.initialTimer = 20;
+                            this.showSkipButton = false;
+                            break;
+                    }
+                    
+                    // 进入游戏页面并初始化游戏
+                    this.goToPage('game-page');
+                    this.initGame();
+                },
+                
+                // 初始化游戏
+                initGame() {
+                    this.timer = this.initialTimer;
+                    this.poemList = [];
+                    this.userInput = '';
+                    this.skipUsed = false;
+                    this.isPlaying = true;
+                    this.isPaused = false;
+                    this.usedPoemNormalized = [];
+                    this.currentRound = 0;
+                    
+                    // 生成关键字
+                    this.generateKeyword();
+                    
+                    // AI先出第一句（不启动计时器，等AI完成后启动）
+                    setTimeout(() => {
+                        this.generateAiPoem();
+                    }, 1000);
+                },
+                
+                // 生成关键字
+                generateKeyword() {
+                    // 根据难度生成不同级别的关键字
+                    const keywords = {
+                        easy: ['花', '春', '月', '山', '水', '风', '人', '鸟', '云', '夜', '秋', '日'],
+                        medium: ['心', '江', '天', '酒', '梦', '愁', '马', '雪', '家', '年', '客', '路', '泪', '乡'],
+                        hard: ['归', '空', '旧', '深', '处', '清', '孤', '道', '万', '一', '簪', '砚', '棹', '箫', '榻', '篱', '矶', '龛', '麈', '瓯']
+                    };
+                    
+                    const keywordList = keywords[this.difficulty];
+                    this.keyword = keywordList[Math.floor(Math.random() * keywordList.length)];
+                },
+                
+                // 开始计时器（仅用户回合）
+                startTimer() {
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    
+                    this.timerInterval = setInterval(() => {
+                        if (!this.isPaused && this.isPlaying && !this.aiLoading) {
+                            this.timer--;
+                            
+                            if (this.timer <= 0) {
+                                this.timer = 0;
+                                this.gameOver('lose'); // 超时，用户输了
+                            }
+                        }
+                    }, 1000);
+                },
+                
+                // 停止计时器
+                stopTimer() {
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
+                },
+                
+                // 暂停/继续游戏
+                togglePause() {
+                    this.isPaused = !this.isPaused;
+                },
+                
+                // 提交诗句
+                async submitPoem() {
+                    if (!this.userInput.trim() || !this.isPlaying || this.isPaused) return;
+                    
+                    const poem = this.userInput.trim();
+                    
+                    // 检查诗句是否包含关键字
+                    if (poem.includes(this.keyword)) {
+                        // 进一步校验：是否看起来像诗句（基础规则）
+                        const validate = this.validateUserPoem(poem);
+                        if (!validate.valid) {
+                            alert(validate.reason || '诗句格式不符合要求，请换一句试试');
+                            return;
+                        }
+                        // 取消AI判定，仅保留本地规则
+                        // 检查是否重复（规范化后去重，防止标点/空格差异）
+                        if (this.isDuplicatePoem(poem)) {
+                            alert('这句诗已经说过了，请换一句吧！');
+                            return;
+                        }
+                        
+                        // 添加用户诗句
+                        this.poemList.push({
+                            sender: 'user',
+                            content: poem
+                        });
+                        // 记录规范化后的使用集
+                        this.usedPoemNormalized.push(this.normalizePoem(poem));
+                        
+                        // 增加轮数
+                        this.currentRound++;
+                        
+                        // 检查是否达到胜利条件
+                        if (this.currentRound >= this.roundLimits[this.difficulty]) {
+                            this.gameOver('win');
+                            return;
+                        }
+                        
+                        // 用户提交后停止计时并重置
+                        this.stopTimer();
+                        this.timer = this.initialTimer;
+                        
+                        // 清空输入
+                        this.userInput = '';
+                        
+                        // 滚动到底部
+                        this.scrollToBottom();
+                        
+                        // AI回应（用户回合结束，AI思考时不计时）
+                        setTimeout(() => {
+                            this.generateAiPoem();
+                        }, 1000);
+                    } else {
+                        // 诗句不包含关键字，游戏结束
+                        this.gameOver('lose');
+                    }
+                },
+                
+                // 基础校验：是否像一条诗句（可拓展为后端AI校验）
+                validateUserPoem(poem) {
+                    // 1) 必须包含关键字（上面已判，这里双保险）
+                    if (!poem.includes(this.keyword)) {
+                        return { valid: false, reason: '不包含关键字' };
+                    }
+                    // 1.1) 长度：至少5个汉字
+                    const chineseMatches = poem.match(/[\u4e00-\u9fa5]/g) || [];
+                    if (chineseMatches.length < 5) {
+                        return { valid: false, reason: '至少需5个汉字' };
+                    }
+                    // 2) 中文字符比例
+                    if (chineseMatches.length < 4) {
+                        return { valid: false, reason: '中文字符过少，不像诗句' };
+                    }
+                    // 3) 不允许出现明显的字母/网址字符
+                    if (/[A-Za-z]/.test(poem) || /https?:\/\//.test(poem)) {
+                        return { valid: false, reason: '包含非诗句内容' };
+                    }
+                    // 4) 长度限制（避免整段话）
+                    if (poem.length < 4 || poem.length > 24) {
+                        return { valid: false, reason: '长度异常，不像单句诗' };
+                    }
+                    return { valid: true };
+                },
+
+                // 规范化诗句：去空白与常见中英标点，统一比较
+                normalizePoem(text) {
+                    let t = (text || '').trim();
+                    try {
+                        // 去空白
+                        t = t.replace(/\s+/g, '');
+                        // 去常见中英文标点
+                        t = t.replace(/[\.,，。!！\?？:：;；"“”'''、—\-\(\)（）\[\]【】《》<>〈〉…·]/g, '');
+                    } catch(e) { /* 忽略 */ }
+                    return t;
+                },
+
+                // 判断是否重复（包含 AI 与用户历史）
+                isDuplicatePoem(poem) {
+                    const norm = this.normalizePoem(poem);
+                    return this.usedPoemNormalized.includes(norm);
+                },
+                
+                // 跳过回合（仅入门级可用）
+                skipTurn() {
+                    if (this.difficulty !== 'easy' || this.skipUsed || !this.isPlaying || this.isPaused) return;
+                    
+                    this.skipUsed = true;
+                    
+                    // 跳过回合后立即重置计时器
+                    this.timer = this.initialTimer;
+                    
+                    // AI回应（跳过回合，AI思考时不计时）
+                    setTimeout(() => {
+                        this.generateAiPoem();
+                    }, 500);
+                },
+                
+                // 调用后端 Coze 代理
+                async callCoze(keyword, history) {
+                    const resp = await fetch('/coze/poem', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            keyword,
+                            used: history,
+                            difficulty: this.difficulty
+                        })
+                    });
+                    if (!resp.ok) throw new Error('Proxy error');
+                    return await resp.json();
+                },
+
+                // 本地兜底诗句（Coze 调用失败或为空时使用）
+                getFallbackPoem() {
+                    const aiPoems = {
+                        '月': [
+                            { content: '床前明月光，疑是地上霜。', author: '李白《静夜思》' },
+                            { content: '明月几时有，把酒问青天。', author: '苏轼《水调歌头》' },
+                            { content: '举头望明月，低头思故乡。', author: '李白《静夜思》' },
+                            { content: '春风又绿江南岸，明月何时照我还。', author: '王安石《泊船瓜洲》' },
+                            { content: '深林人不知，明月来相照。', author: '王维《竹里馆》' }
+                        ],
+                        '花': [
+                            { content: '夜来风雨声，花落知多少。', author: '孟浩然《春晓》' },
+                            { content: '感时花溅泪，恨别鸟惊心。', author: '杜甫《春望》' },
+                            { content: '晓看红湿处，花重锦官城。', author: '杜甫《春夜喜雨》' },
+                            { content: '黄四娘家花满蹊，千朵万朵压枝低。', author: '杜甫《江畔独步寻花》' },
+                            { content: '西塞山前白鹭飞，桃花流水鳜鱼肥。', author: '张志和《渔歌子》' }
+                        ],
+                        '春': [
+                            { content: '春眠不觉晓，处处闻啼鸟。', author: '孟浩然《春晓》' },
+                            { content: '红豆生南国，春来发几枝。', author: '王维《相思》' },
+                            { content: '不知细叶谁裁出，二月春风似剪刀。', author: '贺知章《咏柳》' },
+                            { content: '春风又绿江南岸，明月何时照我还。', author: '王安石《泊船瓜洲》' },
+                            { content: '国破山河在，城春草木深。', author: '杜甫《春望》' }
+                        ],
+                        '风': [
+                            { content: '昨夜西风凋碧树，独上高楼，望尽天涯路。', author: '晏殊《蝶恋花》' },
+                            { content: '春风又绿江南岸，明月何时照我还。', author: '王安石《泊船瓜洲》' },
+                            { content: '随风潜入夜，润物细无声。', author: '杜甫《春夜喜雨》' },
+                            { content: '大风起兮云飞扬。', author: '刘邦《大风歌》' },
+                            { content: '羌笛何须怨杨柳，春风不度玉门关。', author: '王之涣《凉州词》' }
+                        ],
+                        '秋': [
+                            { content: '自古逢秋悲寂寥，我言秋日胜春朝。', author: '刘禹锡《秋词》' },
+                            { content: '银烛秋光冷画屏，轻罗小扇扑流萤。', author: '杜牧《秋夕》' },
+                            { content: '停车坐爱枫林晚，霜叶红于二月花。', author: '杜牧《山行》' },
+                            { content: '落霞与孤鹜齐飞，秋水共长天一色。', author: '王勃《滕王阁序》' },
+                            { content: '长风万里送秋雁，对此可以酣高楼。', author: '李白《宣州谢朓楼饯别校书叔云》' }
+                        ],
+                        '酒': [
+                            { content: '花间一壶酒，独酌无相亲。', author: '李白《月下独酌》' },
+                            { content: '劝君更尽一杯酒，西出阳关无故人。', author: '王维《送元二使安西》' },
+                            { content: '对酒当歌，人生几何？', author: '曹操《短歌行》' },
+                            { content: '桃李春风一杯酒，江湖夜雨十年灯。', author: '黄庭坚《寄黄几复》' },
+                            { content: '白日放歌须纵酒，青春作伴好还乡。', author: '杜甫《闻官军收河南河北》' }
+                        ],
+                        '簪': [
+                            { content: '白头搔更短，浑欲不胜簪。', author: '杜甫《春望》' },
+                            { content: '高髻云鬟宫样妆，春风一曲杜韦娘。', author: '杜牧《赠别》' },
+                            { content: '花钿委地无人收，翠翘金雀玉搔头。', author: '白居易《长恨歌》' },
+                            { content: '行到中庭数花朵，蜻蜓飞上玉搔头。', author: '刘禹锡《和乐天春词》' },
+                            { content: '满头白发为谁新，昨夜簪花昨夜人。', author: '陆游《新晴》' }
+                        ]
+                    };
+                    
+                    const list = aiPoems[this.keyword] || [];
+                    const unused = list.filter(p => !this.isDuplicatePoem(p.content));
+                    if (unused.length === 0) return null;
+                    return unused[Math.floor(Math.random() * unused.length)];
+                },
+
+                // 生成AI诗句（Coze）
+                async generateAiPoem() {
+                    if (!this.keyword || this.aiLoading || !this.isPlaying || this.isPaused) return;
+                    try {
+                        this.aiLoading = true;
+                        const usedContents = this.poemList.map(p => p.content);
+                        const result = await this.callCoze(this.keyword, usedContents);
+                        if (!result || !result.content) {
+                            // 调用成功但空内容，启用本地兜底
+                            const fb = this.getFallbackPoem();
+                            if (!fb) { this.gameOver('win'); return; }
+                            // 防止 AI 连续两条
+                            if (!this.poemList.length || this.poemList[this.poemList.length - 1].sender !== 'ai') {
+                                this.poemList.push({ sender: 'ai', content: fb.content, author: fb.author || '' });
+                            }
+                            this.scrollToBottom();
+                        return;
+                    }
+                        const isDup = this.poemList.some(i => i.content.trim() === result.content.trim());
+                        if (isDup) {
+                            const fb = this.getFallbackPoem();
+                            if (!fb) { this.gameOver('win'); return; }
+                            if (!this.poemList.length || this.poemList[this.poemList.length - 1].sender !== 'ai') {
+                                this.poemList.push({ sender: 'ai', content: fb.content, author: fb.author || '' });
+                            }
+                    this.scrollToBottom();
+                            return;
+                        }
+                        // 添加AI诗句到列表
+                        const aiContent = result.content.trim();
+                        if (this.isDuplicatePoem(aiContent)) { // 若AI误给了重复，换本地兜底
+                            const fb2 = this.getFallbackPoem();
+                            if (fb2) {
+                                this.poemList.push({ sender: 'ai', content: fb2.content, author: fb2.author || '' });
+                                this.usedPoemNormalized.push(this.normalizePoem(fb2.content));
+                            }
+                        } else {
+                            this.poemList.push({ sender: 'ai', content: aiContent, author: result.author || '' });
+                            this.usedPoemNormalized.push(this.normalizePoem(aiContent));
+                        }
+                        this.scrollToBottom();
+                        // AI完成后，重置计时器并启动
+                        this.timer = this.initialTimer;
+                        this.startTimer();
+                    } catch (e) {
+                        // 调用失败，启用本地兜底，不要直接判你赢
+                        const fb = this.getFallbackPoem();
+                        if (!fb) { this.gameOver('win'); return; }
+                        if (!this.poemList.length || this.poemList[this.poemList.length - 1].sender !== 'ai') {
+                            this.poemList.push({ sender: 'ai', content: fb.content, author: fb.author || '' });
+                        }
+                        this.scrollToBottom();
+                        // AI完成后，重置计时器并启动
+                        this.timer = this.initialTimer;
+                        this.startTimer();
+                    } finally {
+                        this.aiLoading = false;
+                    }
+                },
+                
+                // 滚动到对话底部
+                scrollToBottom() {
+                    setTimeout(() => {
+                        const container = document.querySelector('.bg-white/60.backdrop-blur-sm.rounded-lg.p-3.border.border-secondary\\/30.shadow-md.h-\\[50vh\\].overflow-y-auto');
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 100);
+                },
+                
+                
+                // 重新开始游戏
+                restartGame() {
+                    this.showGameOverModal = false;
+                    this.initGame();
+                },
+                
+                // 认输
+                surrender() {
+                    if (!this.isPlaying || this.isPaused) return;
+                    this.gameOver('lose');
+                },
+                
+                // 切换诗词背景显示
+                async togglePoemBackground() {
+                    if (!this.showPoemBackground) {
+                        // 立即显示内容框并开始加载
+                        this.showPoemBackground = true;
+                        this.backgroundLoading = true;
+                        // 获取诗词背景
+                        await this.getPoemBackground();
+                    } else {
+                        this.showPoemBackground = false;
+                    }
+                },
+                
+                // 获取诗词背景
+                async getPoemBackground() {
+                    try {
+                        // 从游戏中的诗句随机选择一首
+                        const allPoems = this.poemList.filter(p => p.content && p.content.trim());
+                        if (allPoems.length === 0) {
+                            this.poemBackground = '暂无诗词背景信息';
+                            this.backgroundLoading = false;
+                            return;
+                        }
+                        
+                        const randomPoem = allPoems[Math.floor(Math.random() * allPoems.length)];
+                        
+                        const response = await fetch('/coze/background', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                poem: randomPoem.content,
+                                author: randomPoem.author || ''
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            this.poemBackground = result.background || '暂无背景信息';
+                        } else {
+                            this.poemBackground = '暂无背景信息';
+                        }
+                    } catch (error) {
+                        this.poemBackground = '暂无背景信息';
+                    } finally {
+                        this.backgroundLoading = false;
+                    }
+                },
+                
+                // 音乐控制方法
+                playMusic(type) {
+                    // 停止当前音乐
+                    if (this.currentMusic) {
+                        this.currentMusic.pause();
+                        this.currentMusic = null;
+                    }
+                    
+                    // 根据类型选择音乐
+                    let musicFile = '';
+                    let selectedMusicItem = null;
+                    if (type === 'home') {
+                        musicFile = '浮影掠光映百合-陈致逸&HOYOMIX.mp3';
+                        selectedMusicItem = this.musicList.find(m => m.type === 'home');
+                    } else if (type === 'easy') {
+                        musicFile = '商港的闲暇-陈致逸&HOYOMIX.mp3';
+                        selectedMusicItem = this.musicList.find(m => m.type === 'easy');
+                    } else if (type === 'medium') {
+                        musicFile = '盛唐令-路南.mp3';
+                        selectedMusicItem = this.musicList.find(m => m.type === 'medium');
+                    } else if (type === 'hard') {
+                        musicFile = '激流逐浪-陈致逸&HOYOMIX.mp3';
+                        selectedMusicItem = this.musicList.find(m => m.type === 'hard');
+                    }
+                    
+                    if (musicFile) {
+                        this.selectedMusic = selectedMusicItem;
+                        this.currentMusic = new Audio(musicFile);
+                        this.currentMusic.loop = true;
+                        this.currentMusic.volume = 0.3;
+                        this.currentMusic.play().catch(e => console.log('音乐播放失败:', e));
+                        this.isMusicPlaying = true;
+                    }
+                },
+                
+                stopMusic() {
+                    if (this.currentMusic) {
+                        this.currentMusic.pause();
+                        this.currentMusic = null;
+                        this.isMusicPlaying = false;
+                        this.selectedMusic = null;
+                    }
+                },
+                
+                toggleMusic() {
+                    if (this.isMusicPlaying) {
+                        this.stopMusic();
+                    } else {
+                        // 根据当前页面播放对应音乐
+                        if (this.currentPage === 'home-page' || this.currentPage === 'difficulty-page') {
+                            this.playMusic('home');
+                        } else if (this.currentPage === 'game-page') {
+                            this.playMusic(this.difficulty);
+                        }
+                    }
+                },
+                
+                // 处理音乐列表鼠标离开事件
+                handleMusicListLeave() {
+                    // 延迟隐藏，给用户时间移动到列表
+                    setTimeout(() => {
+                        this.showMusicList = false;
+                    }, 300);
+                },
+                
+                // 选择音乐（仅在主页可用）
+                selectMusic(music) {
+                    if (this.currentPage === 'home-page') {
+                        console.log('选择音乐:', music.name);
+                        this.stopMusic();
+                        this.selectedMusic = music;
+                        this.currentMusic = new Audio(music.file);
+                        this.currentMusic.loop = true;
+                        this.currentMusic.volume = 0.3;
+                        this.currentMusic.play().catch(e => console.log('音乐播放失败:', e));
+                        this.isMusicPlaying = true;
+                        this.showMusicList = false;
+                    }
+                },
+                
+                // 游戏结束时切换音乐
+                gameOver(result) {
+                    this.stopTimer();
+                    this.isPlaying = false;
+                    this.gameOverResult = result;
+                    this.showGameOverModal = true;
+                    
+                    // 游戏结束后切换回主页音乐
+                    this.playMusic('home');
+                },
+                
+            },
+            mounted() {
+                // 初始化页面
+                this.goToPage('home-page');
+                // 自动播放主页音乐
+                this.playMusic('home');
+            }
+        });
+    </script>
+
+
+</body></html>
