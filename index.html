@@ -644,6 +644,11 @@
     </div>
 
     <script>
+        // API 基础地址配置
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : 'https://feihualing-backend.vercel.app';
+
         new Vue({
             el: '#app',
             data: {
@@ -950,7 +955,7 @@
                 
                 // 调用后端 Coze 代理
                 async callCoze(keyword, history) {
-                    const resp = await fetch('/coze/poem', {
+                    const resp = await fetch(`${API_BASE}/api/poem`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1132,7 +1137,7 @@
                         
                         const randomPoem = allPoems[Math.floor(Math.random() * allPoems.length)];
                         
-                        const response = await fetch('/coze/background', {
+                        const response = await fetch(`${API_BASE}/api/background`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
