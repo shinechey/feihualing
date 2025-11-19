@@ -465,7 +465,7 @@
                 <!-- 对话区域 -->
                 <div class="flex-1">
                     <!-- 诗句列表 -->
-                    <div class="bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-secondary/30 shadow-md h-[40vh] overflow-y-auto mb-2">
+                    <div class="poem-list bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-secondary/30 shadow-md h-[40vh] overflow-y-auto mb-2">
                         <div v-for="(poem, index) in poemList" :key="index" class="mb-2 last:mb-0">
                             <!-- AI的诗句 -->
                             <div v-if="poem.sender === 'ai'" class="flex items-start">
@@ -1091,7 +1091,7 @@
                 // 滚动到对话底部
                 scrollToBottom() {
                     setTimeout(() => {
-                        const container = document.querySelector('.bg-white/60.backdrop-blur-sm.rounded-lg.p-3.border.border-secondary\\/30.shadow-md.h-\\[50vh\\].overflow-y-auto');
+                        const container = document.querySelector('.poem-list');
                         if (container) {
                             container.scrollTop = container.scrollHeight;
                         }
